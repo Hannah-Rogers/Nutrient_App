@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Food Nutrient Search</title>
+    <link rel="stylesheet" href="main.css">
+
+</head>
+
+<body>
+<header role="banner">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="title">Food Nutrient Search</h1>
+        <p>Enter in a food item below to find out what it's nutrient value is.</p>
+      </div>
+    </div>
+</header>
+
+    <div id="container">
+        <form id="js-search-form" name="search-form">
+                <input type="search" id="query" class="js-query" placeholder="ie: Apple">
+                <input type="submit" class="searchBTN" id="button" value="Submit">
+        </form>
+
+        <h2>Results</h2>
+        <h3 class="js-nutrient-header"></h3>
+        <div class="js-search-results"></div>
+        <div class="js-results"></div>
+        <p class="js-nutrient-list"></p>
+
+
+    </div>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="ndbno.js"></script>
+</body>
+
+</html>
