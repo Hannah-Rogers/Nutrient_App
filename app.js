@@ -1,48 +1,60 @@
+"use-strict";
+
+
 var myPage = (function(page) {
-    "use strict";
 
-//USDA api data______________________________
-var USDA_URL = {
-	searchURL: 'http://api.nal.usda.gov/ndb/search/?format=json',
-	nutrientUrl: 'http://api.nal.usda.gov/ndb/nutrients/?format=json',
-	key: 'krBcPpdX6JTkBNyzXjJU8a65fzYQxOEZbFOzxHQT'
-};  
+    /* variables
+    -------------------------------*/
+    var usda_api = {
+      key: "krBcPpdX6JTkBNyzXjJU8a65fzYQxOEZbFOzxHQT",
+      searchURL: "https://api.nal.usda.gov/ndb/search/?format=json",
+      nutrientURL: "https://api.nal.usda.gov/ndb/nutrients/?format=json"
+    };
 
-var nutrientIDs = {
-	protein: '203',
-	fat: '204',
-	carbs: '205',
-	fiber: '291'
-};
-
-
-//url functions______________________________
-function getSearchURL(query) {
-	var URL = USDA_URL.searchURL;
-	URL += '&api_key=' + USDA_URL.key;
-	URL += '&q=' + query;
-
-	return URL;
-}
-
-function getNutrientURL(id) {
-	var URL = USDA_URL.nutrientURL;
-	URL += '&api_key=' + USDA_URL.key;
-	URL += '&nutrients=' + nutrientIDs.protein;
-	URL += '&nutrients=' + nutrientIDs.fat;
-	URL += '&nutrients=' + nutrientIDs.carbs;
-	URL += '&nutrients=' + nutrientIDs.fiber;
-	URL += '&ndbno=' + id; 
-
-	return URL;
-}
+    var nutrients = {
+      protein: "203",
+      fat: "204",
+      carbs: "205",
+      fiber: "291",
+      sugars: "269",
+      calories: "208"
+    };
 
 
-//html template_________________________________________________
-function renderInitialResults(data) {
-	var html = "";
-	$.each(data['.list']['.item'], function (i, obj) {
-        var foodName, foodID, icon;
+    /* url functions
+    -------------------------------*/
+    var getSearchURL = function(query) {
+      var URL = usda_api.searchURL;
+      URL += "&api_key=" + usda_api.key;
+      URL += "&q=" + query;
+
+      return URL;
+    }
+
+
+    var getNutrientURL = function(id) {
+      var URL = usda_api.nutrientURL;
+      URL += "&api_key=" + usda_api.key;
+      URL += "&nutrients=" + nutrients.protein;
+      URL += "&nutrients=" + nutrients.fat;
+      URL += "&nutrients=" + nutrients.carbs;
+      URL += "&nutrients=" + nutrients.fiber;
+      URL += "&nutrients=" + nutrients.sugars;
+      URL += "&nutrients=" + nutrients.calories;
+      URL += "&ndbno=" + id;
+
+      return URL;
+    }
+
+
+    /* html functions
+    -------------------------------*/
+    var getResultsHTML = function(data) {
+      var HTML = "";
+      
+      // loop through data and build HTML
+      $.each(data["list"]["item"], function (i, obj) {
+        var foodName, foodID;
         $.each(obj, function (key, value) {
           switch(key) {
             case "name":
@@ -52,32 +64,28 @@ function renderInitialResults(data) {
               foodID = value;
               break;
           }
-        });
+        }); 
 
-        icon = page.fa.fav_o;
-        if (page.favorites.exists(foodID)) {
-          icon = page.fa.fav;
-        }
+        HTML += "<div class='searchItem' data-ndbno='" + foodID + "' data-name='" + foodName + "'>";
+        HTML += foodName;
+        HTML += "</div>"
 
-		HTML += "<div class='searchItem' data-ndbno='" + foodID + "' data-name='" + foodName + "'>";
-        HTML += foodName + "<i class='favorite " + icon + "'></i>";
-        HTML += "</div>";
-	});
-	return html;
-}
+      }); 
 
-function renderNutrientResults(data) {
-      var header = data['.report']['.foods'][0]['.name'];
-      if (header.length > 40) {
-        header = header.slice(0,40) + "...";
-      }
+      return HTML;
+    }
+
+
+    var getNutrientHTML = function(data) {
+      // format the header
+      var header = data["report"]["foods"][0]["name"];
       
       // append header and severing size
-      $('.js-nutrient-header').html(header);
+      $(".js-nutrient-header").html(header);
+      $("js-nutrient-serving").html("Serving Size: " + data["report"]["foods"][0]["measure"]);
 
-      // loop through data and build html
       var HTML = "";
-      $.each(data['.report']['.foods'][0]['.nutrients'], function (i, obj) {
+      $.each(data["report"]["foods"][0]["nutrients"], function (i, obj) {
         var nutrientName, nutrientValue;
         $.each(obj, function (key, value) {
           switch(key) {
@@ -93,6 +101,14 @@ function renderNutrientResults(data) {
 
                 case "Fiber, total dietary":
                   nutrientName = "Fiber";
+                  break;
+                  
+                case "Energy":
+                  nutrientName = "Calories";
+                  break;
+                  
+                case "Sugars, total":
+                  nutrientName = "Sugars";
                   break;
 
                 default:
@@ -110,72 +126,66 @@ function renderNutrientResults(data) {
               }
               break;
 
-          } // end of switch
-        }); // end of inner loop
+          } 
+        }); 
 
-        // concat html string
-        HTML += "<div>" + nutrientName + ": " + nutrientValue + "</div>";
-
-      });   // end of outer loop
+        HTML += "<div class='nutrients' >" + nutrientName + ": " + nutrientValue + "</div>";
+      });  
 
       return HTML;
     }
 
-    var _getErrorHTML = function() {
-      return "<div style='text-align:center;'>No results found</div>";
 
-};
+    var getErrorHTML = function() {
+      return "<div style='text-align:center;'>Oops! No results were found.</div>"
+    }
 
 
-//get data from API________________________________________
-function getSearchDataFromAPI(query) {
-	$.ajax({
+    /* ajax calls
+    -------------------------------*/
+    var search = function(query) {
+      $.ajax({
         type: "GET",
-        url: USDA_URL(query),
+        url: getSearchURL(query),
         success: function (data) {
-          $('.js-results').html(getSearchURL(data));
+          if (data["list"]["item"].length > 0) {
+            $(".js-search-results").html(getResultsHTML(data));
+          }
+          else {
+            $(".js-search-results").html(getErrorHTML());
+          }
         },
-        error: function (xhr, error) {
-          //console.debug(xhr); console.debug(error);
-        $('.js-results').html(_getErrorHTML());
+        error: function (jqxhr, error) {
+          $(".js-search-results").html(getErrorHTML());
         }
       });
     }
+    
 
-function getNutrientDataFromAPI(id) {
+    var getNutrients = function(id) {
       $.ajax({
         type: "GET",
         url: getNutrientURL(id),
         success: function (data) {
-          if (data['.report']['.foods'].length > 0) {
-            // build results html
-            $('.js-nutrient-list').html(renderNutrientResults(data));
+          if (data["report"]["foods"].length > 0) {
+            $(".js-nutrient-list").html(getNutrientHTML(data));
           }
           else {
-            // show no results
-            $('.js-nutrient-list').html(_getErrorHTML());
+            $(".js-nutrient-list").html(getErrorHTML());
           }
         },
-        error: function (xhr, error) {
-          //console.debug(xhr); console.debug(error);v
-          
-          // open the nutrient modal with error message
-          $('js-nutrient-list').html(_getErrorHTML());
+        error: function (jqxhr, error) {
+          $(".js-nutrient-list").html(getErrorHTML());
         }
       });
     }
 
-    $('#button').on('click', function(event) {
-    event.preventDefault();
-    $('.js-search-results').empty();
-    getNutrientDataFromAPI();
-  });
 
-
-//display results______________________________________________________
+    /* create usda namespace
+    -------------------------------*/
     page.usda = {
-      getSearchDataFromAPI: getSearchDataFromAPI,
-      getNutrientDataFromAPI: getNutrientDataFromAPI
+      search: search,
+      getNutrients: getNutrients
     };
 
     return page;
@@ -183,4 +193,38 @@ function getNutrientDataFromAPI(id) {
   })(myPage || {});
 
 
+/*=================================
+  page_events.js
+  =================================*/
+  !function(page) {
+    "use strict";
+
+    /* txtSearch
+    -------------------------------*/
+    $(".js-query").on("keypress", function(e) {
+      // pressed enter key
+      if (e.keyCode === 13) {
+        e.preventDefault();
+
+        // search usda database
+        var query = $(".js-query").val();
+        page.usda.search(query);
+
+        // remove focus
+        $(".js-query").blur();
+      }
+    });
+
+
+    /* results
+    -------------------------------*/
+    $(".js-search-results")
+      // fetch nutrient data
+      .on("click", ".searchItem", function() {
+        $('.show-nutrients').removeClass('hidden');
+        var id = $(this).attr('data-ndbno');
+        page.usda.getNutrients(id);
+      });
+
+  }(myPage);
 
