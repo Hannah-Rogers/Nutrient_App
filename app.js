@@ -3,8 +3,7 @@
 
 var myPage = (function(page) {
 
-    /* variables
-    -------------------------------*/
+/* variables -------------------------------*/
     var usda_api = {
       key: "krBcPpdX6JTkBNyzXjJU8a65fzYQxOEZbFOzxHQT",
       searchURL: "https://api.nal.usda.gov/ndb/search/?format=json",
@@ -21,9 +20,8 @@ var myPage = (function(page) {
     };
 
 
-    /* url functions
-    -------------------------------*/
-    var getSearchURL = function(query) {
+/* url functions-------------------------------*/
+    var _getSearchURL = function(query) {
       var URL = usda_api.searchURL;
       URL += "&api_key=" + usda_api.key;
       URL += "&q=" + query;
@@ -32,7 +30,7 @@ var myPage = (function(page) {
     }
 
 
-    var getNutrientURL = function(id) {
+    var _getNutrientURL = function(id) {
       var URL = usda_api.nutrientURL;
       URL += "&api_key=" + usda_api.key;
       URL += "&nutrients=" + nutrients.protein;
@@ -49,7 +47,7 @@ var myPage = (function(page) {
 
     /* html functions
     -------------------------------*/
-    var getResultsHTML = function(data) {
+    var _getResultsHTML = function(data) {
       var HTML = "";
       
       // loop through data and build HTML
@@ -64,26 +62,30 @@ var myPage = (function(page) {
               foodID = value;
               break;
           }
-        }); 
+        }); // end of inner loop
 
+
+
+        // concat html string
         HTML += "<div class='searchItem' data-ndbno='" + foodID + "' data-name='" + foodName + "'>";
         HTML += foodName;
         HTML += "</div>"
 
-      }); 
+      }); // end of outer loop
 
       return HTML;
     }
 
 
-    var getNutrientHTML = function(data) {
+    var _getNutrientHTML = function(data) {
       // format the header
       var header = data["report"]["foods"][0]["name"];
       
       // append header and severing size
       $(".js-nutrient-header").html(header);
-      $("js-nutrient-serving").html("Serving Size: " + data["report"]["foods"][0]["measure"]);
+      $(".js-nutrient-serving").html("Serving Size: " + data["report"]["foods"][0]["measure"]);
 
+      // loop through data and build html
       var HTML = "";
       $.each(data["report"]["foods"][0]["nutrients"], function (i, obj) {
         var nutrientName, nutrientValue;
@@ -126,18 +128,19 @@ var myPage = (function(page) {
               }
               break;
 
-          } 
-        }); 
+          } // end of switch
+        }); // end of inner loop
 
+        // concat html string
         HTML += "<div class='nutrients' >" + nutrientName + ": " + nutrientValue + "</div>";
-      });  
+      });   // end of outer loop
 
       return HTML;
     }
 
 
-    var getErrorHTML = function() {
-      return "<div style='text-align:center;'>Oops! No results were found.</div>"
+    var _getErrorHTML = function() {
+      return "<div style='text-align:center;'>No results found</div>"
     }
 
 
@@ -146,17 +149,13 @@ var myPage = (function(page) {
     var search = function(query) {
       $.ajax({
         type: "GET",
-        url: getSearchURL(query),
+        url: _getSearchURL(query),
         success: function (data) {
-          if (data["list"]["item"].length > 0) {
-            $(".js-search-results").html(getResultsHTML(data));
-          }
-          else {
-            $(".js-search-results").html(getErrorHTML());
-          }
+          $(".js-search-results").html(_getResultsHTML(data));
         },
-        error: function (jqxhr, error) {
-          $(".js-search-results").html(getErrorHTML());
+        error: function (xhr, error) {
+          //console.debug(xhr); console.debug(error);
+          $(".js-search-results").html(_getErrorHTML());
         }
       });
     }
@@ -165,17 +164,24 @@ var myPage = (function(page) {
     var getNutrients = function(id) {
       $.ajax({
         type: "GET",
-        url: getNutrientURL(id),
+        url: _getNutrientURL(id),
         success: function (data) {
           if (data["report"]["foods"].length > 0) {
-            $(".js-nutrient-list").html(getNutrientHTML(data));
+            // build results html
+            $(".js-nutrient-list").html(_getNutrientHTML(data));
           }
           else {
-            $(".js-nutrient-list").html(getErrorHTML());
+            // show no results
+            $(".js-nutrient-list").html(_getErrorHTML());
           }
+
+ 
         },
-        error: function (jqxhr, error) {
-          $(".js-nutrient-list").html(getErrorHTML());
+        error: function (xhr, error) {
+          //console.debug(xhr); console.debug(error);v
+          
+          // open the nutrient modal with error message
+          $(".js-nutrient-list").html(_getErrorHTML());
         }
       });
     }
