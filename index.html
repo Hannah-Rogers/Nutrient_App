@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-
 <html>
 <head>
     <title>Food Nutrient Search</title>
-    <link rel="stylesheet" href="main.css">
+        <link rel="stylesheet" href="main.css">
+        <link rel="stylesheet" href="float-grid.css">
 
 </head>
 
@@ -12,28 +12,43 @@
     <div class="row">
       <div class="col-12">
         <h1 class="title">Food Nutrient Search</h1>
-        <p>Enter in a food item below to find out what it's nutrient value is.</p>
+        <h3>Want to know what nutrients are in your food? Enter a food item below to find out what nutrients are in the food you eat.</h3>
       </div>
     </div>
 </header>
 
-    <div id="container">
-        <form id="js-search-form" name="search-form">
-                <input type="search" id="query" class="js-query" placeholder="ie: Apple">
-                <input type="submit" class="searchBTN" id="button" value="Submit">
+<main>
+  <div class="row">
+    <div class="col-12">
+      <form class="js-search-form" name="search-form">
+          <input type="search" id="user-text" class="js-query" placeholder="ie: Apple">
         </form>
-
-        <h2>Results</h2>
-        <h3 class="js-nutrient-header"></h3>
-        <div class="js-search-results"></div>
-        <div class="js-results"></div>
-        <p class="js-nutrient-list"></p>
-
-
     </div>
+  </div>
+  
+  <div id="results" class="col-6">
+    <div>
+        <h2>Results</h2>
+        <p>Click on a result item to see it's nutrient value.</p>
+        <div class="js-search-results"></div>
+    </div>
+  </div>
+  
+<div class="col-6">
+    <div class="hidden show-nutrients">
+       <h2 id="nutrient-results" class="js-nutrient-header"></h2>
+        <p id="nutrient-serving" class="js-nutrient-serving"></p>
+        <p id="nutrient-list" class="js-nutrient-list"></p>
+    </div>
+</div>
+
+  
+</main>
 
   <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-  <script src="ndbno.js"></script>
+  <script src="app.js"></script>
+ 
+
 </body>
 
 </html>
