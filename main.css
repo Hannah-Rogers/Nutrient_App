@@ -1,0 +1,53 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-image: url(fruit.jpg);
+  background-size: auto;
+}
+
+
+form {
+text-align: center;
+padding-top: 10px;
+}
+
+.searchItem {
+  cursor: pointer; 
+  padding: 10px 10px 10px 10px; 
+  position: relative;
+  background-color: white;
+  text-align: left;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+
+#user-text {
+  border-radius: 10px;
+  height: 50px;
+  margin: 0 auto;
+  outline: 1px black;
+  padding: 1px 1px 1px 10px;
+  width: 80%;
+  font-size: 30px;
+  text-transform: uppercase;
+}
+
+
+.show-nutrients {
+  position: fixed; 
+  padding: 10px 10px 10px 10px;
+  margin-right: 50px;
+  margin-left: 20px;
+  margin-top: 100px;
+  border-radius: 10px;
+}
+
+.hidden {
+  display: none;
+}
+
+
