@@ -11,6 +11,6 @@ The [Nutrient App](https://hannah-rogers.github.io/Nutrient_App/) lets you searc
 * jQuery
 
 ### Screenshots ###
-![Landing Page](/Nutrient_App/screenshots/landingpage.png)
-![Initial Search](/Nutrient_App/screenshots/search.png)
-![Nutrient Show](/Nutrient_App/screenshots/nutrients.png)
+![Landing Page](screenshots/landingpage.png)
+![Initial Search](screenshots/search.png)
+![Nutrient Show](screenshots/nutrients.png)
